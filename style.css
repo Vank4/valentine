@@ -223,26 +223,35 @@ canvas {
 .letter-overlay {
   position: fixed;
   inset: 0;
-  z-index: 40;
-
   background: rgba(0, 0, 0, 0.55);
 
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  z-index: 50;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.35s ease;
+  transition: opacity 0.4s ease;
 }
+
+.letter-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
 /* ============================= */
 /* ===== 3D Envelope Wrapper ==== */
 /* ============================= */
 
 .envelope-wrapper {
-  position: fixed;
-  inset: 0;
-  z-index: 60;
-  display: grid;
-  place-items: center;
-  pointer-events: none;
-  perspective: 1200px;
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .envelope-wrapper[aria-hidden="false"] {
@@ -299,21 +308,18 @@ canvas {
 /* ============================= */
 
 .letter-paper {
-  position: absolute;
-  left: 50%;
-  bottom: 10px;
-  transform: translateX(-50%) translateY(60%);
-  width: 90%;
-  max-height: 300px;
+  width: 100%;
+  max-width: 520px;
 
   background: linear-gradient(180deg, #fff7f0, #fff1f7);
-  border-radius: 16px;
-  padding: 22px 20px;
-  box-shadow: 0 20px 80px rgba(0, 0, 0, 0.5);
+  border-radius: 18px;
+  padding: 28px 26px;
 
-  transition: transform 0.8s ease;
-  z-index: 2;
-  overflow: hidden;
+  box-shadow:
+    0 40px 120px rgba(0, 0, 0, 0.55),
+    0 0 90px rgba(255, 0, 120, 0.18);
+
+  transition: transform 0.6s ease;
 }
 
 /* Trượt lên khi mở */
