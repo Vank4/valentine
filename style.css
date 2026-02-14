@@ -4,25 +4,546 @@ body {
   height: 100%;
   background: #05060a;
   overflow: hidden;
-}
-canvas {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-.hint {
-  position: fixed;
-  left: 14px;
-  bottom: 12px;
-  color: #ffffffb3;
-  font:
-    14px/1.4 system-ui,
+  font-family:
+    system-ui,
     -apple-system,
     Segoe UI,
     Roboto;
-  user-select: none;
-  text-shadow: 0 2px 10px #000;
 }
-.hint b {
-  color: #fff;
+
+/* ============================= */
+/* ===== Particle Canvas ======= */
+/* ============================= */
+
+canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 5; /* trái tim nằm trên ảnh */
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* ============================= */
+/* ===== Background Images ===== */
+/* ============================= */
+
+.bg-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+
+  overflow: hidden;
+  pointer-events: none;
+
+  opacity: 0; /* Ẩn ban đầu */
+  transition: opacity 1.6s ease;
+}
+
+/* Khi hiển thị */
+.bg-layer.visible {
+  opacity: 1;
+}
+
+/* ============================= */
+/* ===== Ảnh mặc định ===== */
+/* ============================= */
+
+.bg-layer img {
+  position: absolute;
+
+  height: 180px;
+  width: auto;
+  max-width: 240px;
+
+  border-radius: 22px;
+  object-fit: cover;
+
+  box-shadow:
+    0 15px 40px rgba(255, 0, 120, 0.25),
+    0 0 40px rgba(255, 0, 120, 0.15);
+
+  cursor: pointer;
+  pointer-events: auto;
+
+  /* tách animation khỏi transform hover */
+  animation: float-horizontal linear infinite;
+
+  transition:
+    box-shadow 0.4s ease,
+    opacity 0.4s ease;
+}
+
+/* ============================= */
+/* ===== Hover nhẹ ===== */
+/* ============================= */
+
+.bg-layer img:not(.expanded):hover {
+  box-shadow:
+    0 25px 60px rgba(255, 0, 120, 0.35),
+    0 0 60px rgba(255, 0, 120, 0.25);
+}
+
+/* ============================= */
+/* ===== Khi ảnh được phóng to ===== */
+/* ============================= */
+
+.bg-layer img.expanded {
+  position: fixed !important;
+
+  top: 50% !important;
+  left: 50% !important;
+
+  transform: translate(-50%, -50%) !important;
+
+  width: auto !important;
+  max-width: 55vw;
+  max-height: 65vh;
+  height: auto;
+
+  z-index: 999 !important;
+
+  animation: none !important;
+
+  box-shadow:
+    0 40px 100px rgba(255, 0, 120, 0.6),
+    0 0 120px rgba(255, 0, 120, 0.4);
+}
+
+/* ============================= */
+/* ===== Overlay khi phóng to ===== */
+/* ============================= */
+
+.image-overlay {
+  position: fixed;
+  inset: 0;
+
+  background: rgba(0, 0, 0, 0.08);
+  backdrop-filter: blur(1px);
+
+  z-index: 40;
+
+  opacity: 0;
+  pointer-events: none;
+
+  transition: opacity 0.4s ease;
+}
+
+.image-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ============================= */
+/* ===== Animation chạy ngang ===== */
+/* ============================= */
+
+@keyframes float-horizontal {
+  from {
+    transform: translateX(-250px);
+  }
+  to {
+    transform: translateX(110vw);
+  }
+}
+/* ============================= */
+/* ===== Envelope Button ======= */
+/* ============================= */
+
+.envelope {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  z-index: 12; /* trên ảnh + dưới modal */
+  border: none;
+  background: rgba(10, 10, 18, 0.35);
+  backdrop-filter: blur(2px);
+
+  padding: 14px 18px;
+  border-radius: 18px;
+
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  cursor: pointer;
+  user-select: none;
+
+  box-shadow:
+    0 18px 60px rgba(255, 0, 120, 0.25),
+    0 0 80px rgba(255, 0, 120, 0.15);
+
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    opacity 0.25s ease;
+}
+
+.envelope:hover {
+  transform: translate(-50%, -50%) scale(1.06);
+  box-shadow:
+    0 24px 80px rgba(255, 0, 120, 0.35),
+    0 0 120px rgba(255, 0, 120, 0.25);
+}
+
+.envelope-icon {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.envelope-text {
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 14px;
+  letter-spacing: 0.6px;
+}
+
+/* nhấp nháy nhẹ theo nhịp tim (JS sẽ cập nhật opacity/scale nhẹ) */
+.envelope.pulse {
+  animation: envelopePulse 1.2s ease-in-out infinite;
+}
+@keyframes envelopePulse {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.04);
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+/* ============================= */
+/* ===== Letter Modal ========== */
+/* ============================= */
+
+.letter-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+
+  background: rgba(0, 0, 0, 0.55);
+
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+}
+/* ============================= */
+/* ===== 3D Envelope Wrapper ==== */
+/* ============================= */
+
+.envelope-wrapper {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  perspective: 1200px;
+}
+
+.envelope-wrapper[aria-hidden="false"] {
+  pointer-events: auto;
+}
+
+/* ============================= */
+/* ===== Envelope 3D ============ */
+/* ============================= */
+
+.letter-envelope {
+  position: relative;
+  width: min(520px, 86vw);
+  height: 320px;
+
+  transform-style: preserve-3d;
+  transition: transform 0.8s ease;
+}
+
+/* ===== Thân phong bì ===== */
+.envelope-base {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, #ffb6d9, #ff87c3);
+  border-radius: 18px;
+  box-shadow:
+    0 40px 120px rgba(0, 0, 0, 0.6),
+    0 0 80px rgba(255, 0, 120, 0.25);
+}
+
+/* ===== Nắp phong bì ===== */
+.envelope-flap {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+
+  background: linear-gradient(180deg, #ff95cc, #ff6ab8);
+  border-radius: 18px 18px 0 0;
+
+  transform-origin: top center;
+  transition: transform 0.8s ease;
+  z-index: 4;
+}
+
+/* Khi mở */
+.letter-envelope.open .envelope-flap {
+  transform: rotateX(-160deg);
+}
+
+/* ============================= */
+/* ===== Giấy bên trong ========= */
+/* ============================= */
+
+.letter-paper {
+  position: absolute;
+  left: 50%;
+  bottom: 10px;
+  transform: translateX(-50%) translateY(60%);
+  width: 90%;
+  max-height: 300px;
+
+  background: linear-gradient(180deg, #fff7f0, #fff1f7);
+  border-radius: 16px;
+  padding: 22px 20px;
+  box-shadow: 0 20px 80px rgba(0, 0, 0, 0.5);
+
+  transition: transform 0.8s ease;
+  z-index: 2;
+  overflow: hidden;
+}
+
+/* Trượt lên khi mở */
+.letter-envelope.open .letter-paper {
+  transform: translateX(-50%) translateY(-40%);
+}
+
+.letter-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.letter-paper::before {
+  content: "";
+  position: absolute;
+  inset: -30%;
+  background:
+    radial-gradient(
+      circle at 30% 20%,
+      rgba(255, 92, 168, 0.18),
+      transparent 60%
+    ),
+    radial-gradient(
+      circle at 70% 80%,
+      rgba(255, 140, 200, 0.14),
+      transparent 55%
+    );
+  transform: rotate(8deg);
+  pointer-events: none;
+}
+
+.letter-header {
+  font-size: 22px;
+  font-weight: 700;
+  position: relative;
+  z-index: 1;
+}
+
+.letter-body {
+  margin-top: 12px;
+  font-size: 16px;
+  line-height: 1.75;
+  position: relative;
+  z-index: 1;
+}
+
+.letter-sign {
+  margin-top: 16px;
+  font-size: 16px;
+  font-weight: 700;
+  text-align: right;
+  position: relative;
+  z-index: 1;
+}
+
+.letter-close {
+  margin-top: 18px;
+  width: 100%;
+  padding: 12px 14px;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+
+  background: rgba(255, 92, 168, 0.95);
+  color: white;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+
+  box-shadow: 0 18px 50px rgba(255, 0, 120, 0.35);
+  transition:
+    transform 0.2s ease,
+    opacity 0.2s ease;
+  position: relative;
+  z-index: 1;
+}
+
+.letter-close:hover {
+  transform: translateY(-1px);
+}
+
+/* ============================= */
+/* ===== Floating Words Layer === */
+/* ============================= */
+
+.floating-words {
+  position: fixed;
+  inset: 0;
+  z-index: 3; /* trên ảnh, dưới trái tim */
+  pointer-events: none;
+}
+
+.word {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+
+  transform: translate(-50%, -50%);
+
+  font-weight: 800;
+  font-size: 16px;
+  letter-spacing: 0.8px;
+
+  background: linear-gradient(90deg, #ffffff, #ffd6ec, #ff7ac6, #ffffff);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+
+  text-shadow:
+    0 0 8px rgba(255, 120, 190, 0.6),
+    0 0 18px rgba(255, 0, 120, 0.6),
+    0 0 30px rgba(255, 0, 120, 0.35);
+
+  opacity: 0;
+  will-change: transform, opacity;
+}
+.word::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+
+  background: linear-gradient(
+    120deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.9) 50%,
+    transparent 100%
+  );
+
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+
+  animation: textShine 3s linear infinite;
+}
+
+@keyframes textShine {
+  from {
+    background-position: -200% 0;
+  }
+  to {
+    background-position: 200% 0;
+  }
+}
+
+/* burst ra như pháo hoa */
+.word.burst {
+  animation: wordBurst 900ms ease-out forwards;
+}
+
+@keyframes wordBurst {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.6);
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy)))
+      scale(1);
+  }
+}
+
+/* sau burst -> bay như ảnh (chạy ngang) */
+.word.floating {
+  opacity: 0.95;
+  animation: wordFloat linear infinite;
+}
+
+@keyframes wordFloat {
+  from {
+    transform: translateX(-260px);
+  }
+  to {
+    transform: translateX(110vw);
+  }
+}
+/* ============================= */
+/* ===== Floating hearts in popup */
+/* ============================= */
+
+.floating-hearts {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.floating-hearts span {
+  position: absolute;
+  font-size: 16px;
+  opacity: 0.25;
+  animation: popupHeartFloat linear infinite;
+}
+
+@keyframes popupHeartFloat {
+  from {
+    transform: translateY(0px) scale(0.8);
+  }
+  to {
+    transform: tra nslateY(-320px) scale(1.1);
+  }
+}
+
+.letter-paper::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    120deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.5) 50%,
+    transparent 70%
+  );
+  transform: translateX(-100%);
+  animation: shimmer 2.2s ease forwards;
+  pointer-events: none;
+}
+
+@keyframes shimmer {
+  to {
+    transform: translateX(120%);
+  }
+}
+#loveTime {
+  font-weight: 700;
+  color: #ff2d88;
+  text-shadow:
+    0 0 12px rgba(255, 0, 120, 0.5),
+    0 0 24px rgba(255, 0, 120, 0.3);
 }
