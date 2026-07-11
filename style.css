@@ -4,555 +4,238 @@ body {
   height: 100%;
   background: #05060a;
   overflow: hidden;
-  font-family:
-    system-ui,
-    -apple-system,
-    Segoe UI,
-    Roboto;
 }
 
-/* ============================= */
-/* ===== Particle Canvas ======= */
-/* ============================= */
+#digital-clock {
+  position: fixed;
+  top: 18px;
+  left: 20px;
+  z-index: 4;
+  color: #ffd6ec;
+  font-family: "Segoe UI", Arial, sans-serif;
+  font-size: clamp(12px, 1.35vw, 18px);
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(5, 6, 10, 0.36);
+  box-shadow:
+    0 0 18px rgba(255, 76, 165, 0.28),
+    inset 0 0 0 1px rgba(255, 166, 210, 0.18);
+  text-shadow:
+    0 0 8px rgba(255, 116, 190, 0.92),
+    0 0 18px rgba(255, 42, 152, 0.6);
+  pointer-events: none;
+  user-select: none;
+}
 
 canvas {
   position: fixed;
   inset: 0;
-  z-index: 5; /* trái tim nằm trên ảnh */
   display: block;
   width: 100%;
   height: 100%;
-  pointer-events: none;
+  z-index: 1;
 }
 
-/* ============================= */
-/* ===== Background Images ===== */
-/* ============================= */
-
-.bg-layer {
+#photo-field {
   position: fixed;
   inset: 0;
-  z-index: 1;
-
+  z-index: 2;
   overflow: hidden;
   pointer-events: none;
-
-  opacity: 0; /* Ẩn ban đầu */
-  transition: opacity 1.6s ease;
 }
 
-/* Khi hiển thị */
-.bg-layer.visible {
-  opacity: 1;
-}
-
-/* ============================= */
-/* ===== Ảnh mặc định ===== */
-/* ============================= */
-
-.bg-layer img {
+.memory-photo {
   position: absolute;
-
-  height: 180px;
-  width: auto;
-  max-width: 240px;
-
-  border-radius: 22px;
-  object-fit: cover;
-
-  box-shadow:
-    0 15px 40px rgba(255, 0, 120, 0.25),
-    0 0 40px rgba(255, 0, 120, 0.15);
-
-  cursor: pointer;
-  pointer-events: auto;
-
-  /* tách animation khỏi transform hover */
-  animation: float-horizontal linear infinite;
-
-  transition:
-    box-shadow 0.4s ease,
-    opacity 0.4s ease;
-}
-
-/* ============================= */
-/* ===== Hover nhẹ ===== */
-/* ============================= */
-
-.bg-layer img:not(.expanded):hover {
-  box-shadow:
-    0 25px 60px rgba(255, 0, 120, 0.35),
-    0 0 60px rgba(255, 0, 120, 0.25);
-}
-
-/* ============================= */
-/* ===== Khi ảnh được phóng to ===== */
-/* ============================= */
-
-.bg-layer img.expanded {
-  position: fixed !important;
-
-  top: 50% !important;
-  left: 50% !important;
-
-  transform: translate(-50%, -50%) !important;
-
-  width: auto !important;
-  max-width: 55vw;
-  max-height: 65vh;
+  display: block;
   height: auto;
-
-  z-index: 999 !important;
-
-  animation: none !important;
-
+  object-fit: contain;
+  border-radius: 10px;
   box-shadow:
-    0 40px 100px rgba(255, 0, 120, 0.6),
-    0 0 120px rgba(255, 0, 120, 0.4);
-}
-
-/* ============================= */
-/* ===== Overlay khi phóng to ===== */
-/* ============================= */
-
-.image-overlay {
-  position: fixed;
-  inset: 0;
-
-  background: rgba(0, 0, 0, 0.08);
-  backdrop-filter: blur(1px);
-
-  z-index: 40;
-
+    0 14px 34px rgba(0, 0, 0, 0.46),
+    0 0 0 1px rgba(255, 255, 255, 0.2);
   opacity: 0;
-  pointer-events: none;
-
-  transition: opacity 0.4s ease;
-}
-
-.image-overlay.active {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-/* ============================= */
-/* ===== Animation chạy ngang ===== */
-/* ============================= */
-
-@keyframes float-horizontal {
-  from {
-    transform: translateX(-250px);
-  }
-  to {
-    transform: translateX(110vw);
-  }
-}
-/* ============================= */
-/* ===== Envelope Button ======= */
-/* ============================= */
-
-.envelope {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-
-  z-index: 12; /* trên ảnh + dưới modal */
-  border: none;
-  background: rgba(10, 10, 18, 0.35);
-  backdrop-filter: blur(2px);
-
-  padding: 14px 18px;
-  border-radius: 18px;
-
-  display: flex;
-  align-items: center;
-  gap: 10px;
-
-  cursor: pointer;
+  transform-origin: center center;
+  transition:
+    opacity 420ms ease,
+    filter 420ms ease;
   user-select: none;
-
-  box-shadow:
-    0 18px 60px rgba(255, 0, 120, 0.25),
-    0 0 80px rgba(255, 0, 120, 0.15);
-
-  transition:
-    transform 0.25s ease,
-    box-shadow 0.25s ease,
-    opacity 0.25s ease;
-}
-
-.envelope:hover {
-  transform: translate(-50%, -50%) scale(1.06);
-  box-shadow:
-    0 24px 80px rgba(255, 0, 120, 0.35),
-    0 0 120px rgba(255, 0, 120, 0.25);
-}
-
-.envelope-icon {
-  font-size: 28px;
-  line-height: 1;
-}
-
-.envelope-text {
-  color: rgba(255, 255, 255, 0.92);
-  font-size: 14px;
-  letter-spacing: 0.6px;
-}
-
-/* nhấp nháy nhẹ theo nhịp tim (JS sẽ cập nhật opacity/scale nhẹ) */
-.envelope.pulse {
-  animation: envelopePulse 1.2s ease-in-out infinite;
-}
-@keyframes envelopePulse {
-  0% {
-    transform: translate(-50%, -50%) scale(1);
-  }
-  50% {
-    transform: translate(-50%, -50%) scale(1.04);
-  }
-  100% {
-    transform: translate(-50%, -50%) scale(1);
-  }
-}
-
-/* ============================= */
-/* ===== Letter Modal ========== */
-/* ============================= */
-
-.letter-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.55);
-
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  z-index: 50;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.4s ease;
-}
-
-.letter-overlay.active {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-/* ============================= */
-/* ===== 3D Envelope Wrapper ==== */
-/* ============================= */
-
-.envelope-wrapper {
-  position: relative;
-  width: 100%;
-  max-width: 520px;
-
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.envelope-wrapper[aria-hidden="false"] {
-  pointer-events: auto;
-}
-
-/* ============================= */
-/* ===== Envelope 3D ============ */
-/* ============================= */
-
-.letter-envelope {
-  position: relative;
-  width: min(520px, 86vw);
-  height: 320px;
-
-  transform-style: preserve-3d;
-  transition: transform 0.8s ease;
-}
-
-/* ===== Thân phong bì ===== */
-.envelope-base {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, #ffb6d9, #ff87c3);
-  border-radius: 18px;
-  box-shadow:
-    0 40px 120px rgba(0, 0, 0, 0.6),
-    0 0 80px rgba(255, 0, 120, 0.25);
-}
-
-/* ===== Nắp phong bì ===== */
-.envelope-flap {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 50%;
-
-  background: linear-gradient(180deg, #ff95cc, #ff6ab8);
-  border-radius: 18px 18px 0 0;
-
-  transform-origin: top center;
-  transition: transform 0.8s ease;
-  z-index: 4;
-}
-
-/* Khi mở */
-.letter-envelope.open .envelope-flap {
-  transform: rotateX(-160deg);
-}
-
-/* ============================= */
-/* ===== Giấy bên trong ========= */
-/* ============================= */
-
-.letter-paper {
-  position: relative;
-  width: 89%;
-  max-width: 520px;
-
-  background: linear-gradient(180deg, #fff7f0, #fff1f7);
-  border-radius: 18px;
-  padding: 28px 26px;
-
-  box-shadow:
-    0 40px 120px rgba(0, 0, 0, 0.55),
-    0 0 90px rgba(255, 0, 120, 0.18);
-
-  transition: transform 0.6s ease;
-
-  transform-origin: center center; /* thêm dòng này */
-}
-
-/* Trượt lên khi mở */
-.letter-envelope.open .letter-paper {
-  transform: translateY(-40%);
-}
-
-.letter-overlay.active {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.letter-paper::before {
-  content: "";
-  position: absolute;
-  inset: -30%;
-  background:
-    radial-gradient(
-      circle at 30% 20%,
-      rgba(255, 92, 168, 0.18),
-      transparent 60%
-    ),
-    radial-gradient(
-      circle at 70% 80%,
-      rgba(255, 140, 200, 0.14),
-      transparent 55%
-    );
-  transform: rotate(8deg);
-  pointer-events: none;
-}
-
-.letter-header {
-  font-size: 22px;
-  font-weight: 700;
-  position: relative;
-  z-index: 1;
-}
-
-.letter-body {
-  margin-top: 12px;
-  font-size: 16px;
-  line-height: 1.75;
-  position: relative;
-  z-index: 1;
-}
-
-.letter-sign {
-  margin-top: 16px;
-  font-size: 16px;
-  font-weight: 700;
-  text-align: right;
-  position: relative;
-  z-index: 1;
-}
-
-.letter-close {
-  margin-top: 18px;
-  width: 100%;
-  padding: 12px 14px;
-  border: none;
-  border-radius: 14px;
-  cursor: pointer;
-
-  background: rgba(255, 92, 168, 0.95);
-  color: white;
-  font-size: 15px;
-  font-weight: 700;
-  letter-spacing: 0.4px;
-
-  box-shadow: 0 18px 50px rgba(255, 0, 120, 0.35);
-  transition:
-    transform 0.2s ease,
-    opacity 0.2s ease;
-  position: relative;
-  z-index: 1;
-}
-
-.letter-close:hover {
-  transform: translateY(-1px);
-}
-
-/* ============================= */
-/* ===== Floating Words Layer === */
-/* ============================= */
-
-.floating-words {
-  position: fixed;
-  inset: 0;
-  z-index: 3; /* trên ảnh, dưới trái tim */
-  pointer-events: none;
-}
-
-.word {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-
-  transform: translate(-50%, -50%);
-
-  font-weight: 800;
-  font-size: 16px;
-  letter-spacing: 0.8px;
-
-  background: linear-gradient(90deg, #ffffff, #ffd6ec, #ff7ac6, #ffffff);
-  background-size: 200% 100%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-
-  text-shadow:
-    0 0 8px rgba(255, 120, 190, 0.6),
-    0 0 18px rgba(255, 0, 120, 0.6),
-    0 0 30px rgba(255, 0, 120, 0.35);
-
-  opacity: 0;
   will-change: transform, opacity;
 }
-.word::after {
-  content: attr(data-text);
-  position: absolute;
+
+.memory-photo.is-visible {
+  opacity: 0.96;
+}
+
+.memory-photo.is-morphing {
+  opacity: 0;
+  filter: brightness(1.7) blur(2px);
+}
+
+.memory-photo.is-flashing {
+  opacity: 1;
+  filter: brightness(2.25) saturate(1.25);
+  box-shadow:
+    0 0 28px rgba(255, 120, 196, 0.42),
+    0 0 58px rgba(255, 64, 160, 0.28),
+    0 14px 34px rgba(0, 0, 0, 0.46),
+    0 0 0 1px rgba(255, 255, 255, 0.35);
+}
+
+.love-letter-modal {
+  position: fixed;
   inset: 0;
-
-  background: linear-gradient(
-    120deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.9) 50%,
-    transparent 100%
-  );
-
-  background-size: 200% 100%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-
-  animation: textShine 3s linear infinite;
-}
-
-@keyframes textShine {
-  from {
-    background-position: -200% 0;
-  }
-  to {
-    background-position: 200% 0;
-  }
-}
-
-/* burst ra như pháo hoa */
-.word.burst {
-  animation: wordBurst 900ms ease-out forwards;
-}
-
-@keyframes wordBurst {
-  0% {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(0.6);
-  }
-  20% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 1;
-    transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy)))
-      scale(1);
-  }
-}
-
-/* sau burst -> bay như ảnh (chạy ngang) */
-.word.floating {
-  opacity: 0.95;
-  animation: wordFloat linear infinite;
-}
-
-@keyframes wordFloat {
-  from {
-    transform: translateX(-260px);
-  }
-  to {
-    transform: translateX(110vw);
-  }
-}
-/* ============================= */
-/* ===== Floating hearts in popup */
-/* ============================= */
-
-.floating-hearts {
-  position: absolute;
-  inset: 0;
+  z-index: 10;
+  display: grid;
+  place-items: center;
+  padding: 22px;
+  background: rgba(3, 3, 7, 0.68);
+  opacity: 0;
+  visibility: hidden;
   pointer-events: none;
+  transition:
+    opacity 280ms ease,
+    visibility 280ms ease;
+  backdrop-filter: blur(7px);
+}
+
+.love-letter-modal.is-open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.love-letter {
+  position: relative;
+  width: min(720px, calc(100vw - 32px));
+  max-height: min(82vh, 760px);
   overflow: hidden;
-  z-index: 1;
+  color: #ffeaf6;
+  font-family: "Segoe UI", Arial, sans-serif;
+  border-radius: 18px;
+  background-image:
+    linear-gradient(135deg, rgba(10, 4, 10, 0.72), rgba(18, 4, 13, 0.88)),
+    url("images/12.jpg");
+  background-position: center;
+  background-size: cover;
+  box-shadow:
+    0 0 36px rgba(255, 76, 165, 0.34),
+    0 24px 90px rgba(0, 0, 0, 0.7),
+    inset 0 0 0 1px rgba(255, 180, 220, 0.24);
+  transform: translateY(14px) scale(0.97);
+  transition: transform 280ms ease;
 }
 
-.floating-hearts span {
-  position: absolute;
-  font-size: 16px;
-  opacity: 0.25;
-  animation: popupHeartFloat linear infinite;
+.love-letter-modal.is-open .love-letter {
+  transform: translateY(0) scale(1);
 }
 
-@keyframes popupHeartFloat {
-  from {
-    transform: translateY(0px) scale(0.8);
-  }
-  to {
-    transform: translateY(-320px) scale(1.1);
-  }
-}
-
-.letter-paper::after {
+.love-letter::before {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    120deg,
-    transparent 30%,
-    rgba(255, 255, 255, 0.5) 50%,
-    transparent 70%
-  );
-  transform: translateX(-100%);
-  animation: shimmer 2.2s ease forwards;
+  background:
+    radial-gradient(circle at 28% 18%, rgba(255, 182, 222, 0.24), transparent 34%),
+    radial-gradient(circle at 74% 70%, rgba(255, 48, 160, 0.2), transparent 38%);
   pointer-events: none;
 }
 
-@keyframes shimmer {
-  to {
-    transform: translateX(120%);
+.love-letter__content {
+  position: relative;
+  max-height: min(82vh, 760px);
+  overflow: auto;
+  padding: clamp(26px, 4.2vw, 48px);
+  padding-right: clamp(34px, 5vw, 56px);
+  text-shadow:
+    0 0 10px rgba(255, 96, 182, 0.46),
+    0 2px 12px rgba(0, 0, 0, 0.72);
+}
+
+.love-letter__content.is-typing .typewriter-active::after {
+  content: "";
+  display: inline-block;
+  width: 0.08em;
+  height: 1em;
+  margin-left: 0.12em;
+  vertical-align: -0.12em;
+  background: #ffd6ec;
+  box-shadow:
+    0 0 8px rgba(255, 116, 190, 0.92),
+    0 0 18px rgba(255, 42, 152, 0.72);
+  animation: typewriter-caret 780ms steps(1) infinite;
+}
+
+@keyframes typewriter-caret {
+  50% {
+    opacity: 0;
   }
 }
-#loveTime {
-  font-weight: 700;
-  color: #ff2d88;
-  text-shadow:
-    0 0 12px rgba(255, 0, 120, 0.5),
-    0 0 24px rgba(255, 0, 120, 0.3);
+
+.love-letter__eyebrow {
+  margin: 0 0 12px;
+  color: #ffb8dc;
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.love-letter h1 {
+  margin: 0 0 18px;
+  color: #fff3fa;
+  font-size: clamp(1.65rem, 4.8vw, 3rem);
+  line-height: 1.08;
+  letter-spacing: 0;
+}
+
+.love-letter p {
+  margin: 0 0 16px;
+  font-size: clamp(1rem, 2.1vw, 1.12rem);
+  line-height: 1.72;
+}
+
+.love-letter__sign {
+  color: #ffd2ea;
+  font-weight: 800;
+}
+
+.love-letter__close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 2;
+  width: 38px;
+  height: 38px;
+  border: 0;
+  border-radius: 50%;
+  color: #ffeaf6;
+  background: rgba(12, 4, 11, 0.72);
+  box-shadow:
+    0 0 16px rgba(255, 90, 180, 0.38),
+    inset 0 0 0 1px rgba(255, 190, 224, 0.3);
+  font-size: 26px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.love-letter__close:hover {
+  background: rgba(255, 72, 166, 0.28);
+}
+
+@media (max-width: 560px) {
+  .love-letter-modal {
+    padding: 16px;
+  }
+
+  .love-letter {
+    width: calc(100vw - 24px);
+    border-radius: 14px;
+  }
+
+  .love-letter__content {
+    padding: 26px 24px;
+    padding-right: 38px;
+  }
 }
